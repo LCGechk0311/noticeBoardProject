@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
-import { NoticeBoardController } from './notice-board.controller';
-import { NoticeBoardService } from './notice-board.service';
+import { PostController } from './notice-board.controller';
+import { PostService } from './notice-board.service';
+import { AuthModule } from 'src/auth/auth.module';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
-  controllers: [NoticeBoardController],
-  providers: [NoticeBoardService]
+  imports: [AuthModule],
+  controllers: [PostController],
+  providers: [PostService, JwtAuthGuard, PrismaService],
 })
 export class NoticeBoardModule {}

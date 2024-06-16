@@ -1,8 +1,8 @@
 export class BulletinBoard {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  author: string;
+  authorId: string;
   views: number;
   createdAt: Date;
   updatedAt: Date;

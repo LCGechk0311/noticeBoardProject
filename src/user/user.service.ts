@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/createUser.dto';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @Injectable()
 export class UserService {
@@ -23,11 +24,40 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async findById(id: number): Promise<User> {
+  async findById(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await this.prisma.user.findMany();
+  }
+
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const { userName, email, password, role } = updateUserDto;
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        userName,
+        email,
+        password,
+        role,
+      },
+    });
+  }
+
+  async deleteUser(id: string): Promise<User> {
+    return await this.prisma.user.delete({
+      where: { id },
+    });
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 }

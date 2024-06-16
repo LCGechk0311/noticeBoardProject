@@ -12,4 +12,7 @@ export class LoginUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  refreshToken?: string;
 }
