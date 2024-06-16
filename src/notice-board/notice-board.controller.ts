@@ -12,10 +12,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { PostService } from './notice-board.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-board.dto';
 import { UpdatePostDto } from './dto/update-board.dto';
-import { GetPostsDto } from './dto/get-boards.dto';
+import { SearchPostsDto } from './dto/search-boards.dto';
 
 @Controller('posts')
 export class PostController {
@@ -37,8 +37,8 @@ export class PostController {
   }
 
   @Get()
-  async getPosts(@Query() getPostsDto: GetPostsDto) {
-    return this.postService.getPosts(getPostsDto);
+  async getPosts(@Query() searchPostsDto: SearchPostsDto) {
+    return this.postService.getPosts(searchPostsDto);
   }
 
   @UseGuards(JwtAuthGuard)

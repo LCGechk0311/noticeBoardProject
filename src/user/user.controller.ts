@@ -11,11 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UpdateUserDto } from './dto/updateUser.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/auth/roles.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
 
 @Controller('user')
 export class UserController {
@@ -46,8 +46,6 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @Request() req,
   ) {
-    console.log(req.user);
-
     if (req.user.role !== 'admin' && req.user.id !== id) {
       throw new ForbiddenException('다른 사람의 정보를 업데이트 할 수없습니다');
     }

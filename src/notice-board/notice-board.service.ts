@@ -2,10 +2,9 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-board.dto';
 import { UpdatePostDto } from './dto/update-board.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BulletinBoard } from './notice-board.entity';
-import { PostCategory } from '@prisma/client';
-import { GetPostsDto, SortOrder } from './dto/get-boards.dto';
+import { Board, PostCategory } from '@prisma/client';
 import { subDays, subMonths, subYears } from 'date-fns';
+import { SearchPostsDto, SortOrder } from './dto/search-boards.dto';
 
 @Injectable()
 export class PostService {
@@ -15,7 +14,7 @@ export class PostService {
     createPostDto: CreatePostDto,
     authorId: string,
     userRole: string,
-  ): Promise<BulletinBoard> {
+  ): Promise<Board> {
     if (
       createPostDto.category === PostCategory.NOTICES &&
       userRole !== 'admin'
@@ -34,7 +33,7 @@ export class PostService {
     id: string,
     updatePostDto: UpdatePostDto,
     userRole: string,
-  ): Promise<BulletinBoard> {
+  ): Promise<Board> {
     const post = await this.prisma.board.findUnique({ where: { id } });
     if (post?.category === PostCategory.NOTICES && userRole !== 'admin') {
       throw new ForbiddenException('Only administrators can update notices');
@@ -45,7 +44,7 @@ export class PostService {
     });
   }
 
-  async deletePost(id: string, userRole: string): Promise<BulletinBoard> {
+  async deletePost(id: string, userRole: string): Promise<Board> {
     const post = await this.prisma.board.findUnique({ where: { id } });
     if (post?.category === PostCategory.NOTICES && userRole !== 'admin') {
       throw new ForbiddenException('Only administrators can delete notices');
@@ -55,7 +54,7 @@ export class PostService {
     });
   }
 
-  async getPost(id: string): Promise<BulletinBoard | null> {
+  async getPost(id: string): Promise<Board | null> {
     const post = await this.prisma.board.findUnique({
       where: { id },
     });
@@ -74,9 +73,16 @@ export class PostService {
     return post;
   }
 
-  async getPosts(getPostsDto: GetPostsDto): Promise<BulletinBoard[]> {
-    const { sortOrder = SortOrder.LATEST, period } = getPostsDto;
+  async getPosts(searchPostsDto: SearchPostsDto): Promise<Board[]> {
+    const {
+      sortOrder = SortOrder.LATEST,
+      period,
+      keyword,
+      title,
+      author,
+    } = searchPostsDto;
     let whereClause = {};
+
     if (period) {
       const now = new Date();
       let dateFrom;
@@ -97,12 +103,53 @@ export class PostService {
       }
     }
 
+    if (keyword) {
+      whereClause = {
+        ...whereClause,
+        OR: [
+          { title: { contains: keyword } },
+          { content: { contains: keyword } },
+          { author: { userName: { contains: keyword } } },
+        ],
+      };
+    }
+
+    if (title) {
+      whereClause = {
+        ...whereClause,
+        title: { contains: title },
+      };
+    }
+
+    if (author) {
+      whereClause = {
+        ...whereClause,
+        author: { userName: { contains: author } },
+      };
+    }
+
     return this.prisma.board.findMany({
       where: whereClause,
       orderBy:
         sortOrder === SortOrder.POPULARITY
           ? { views: 'desc' }
           : { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        authorId: true,
+        category: true,
+        views: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            email: true,
+            userName: true,
+          },
+        },
+      },
     });
   }
 }
