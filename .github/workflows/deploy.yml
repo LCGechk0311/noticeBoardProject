@@ -32,8 +32,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app-lee:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-app-lee:latest
+          docker build -t leechanggeun/my-app-lee:latest .
+          docker push leechanggeun/my-app-lee:latest
 
   deploy:
     runs-on: ubuntu-latest
