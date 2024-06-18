@@ -1,13 +1,25 @@
-FROM node:16
+FROM node:lts as builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-
-RUN npm install
-
 COPY . .
 
-EXPOSE 3000
+RUN ["/usr/local/bin/npm","install"]
+RUN ["/usr/local/bin/npm","run","build"]
+# RUN ["/usr/local/bin/npx", "prisma", "generate"]
 
-CMD ["npm", "start"]
+FROM node:alpine
+
+WORKDIR /app
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/package*.json .
+# COPY --from=builder /usr/src/app/.env .
+COPY --from=builder /usr/src/app/prisma ./prisma
+
+
+RUN npm install 
+RUN npx prisma generate
+
+EXPOSE 3000
+CMD ["npm", "run", "server"] 
