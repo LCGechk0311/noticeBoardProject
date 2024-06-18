@@ -16,7 +16,7 @@ services:
       - mysql-data:/var/lib/mysql
 
   app:
-    image: my-dockerhub-lee/my-app-lee
+    image: leechanggeun/my-app-lee
     container_name: my-app-container
     restart: always
     ports:
