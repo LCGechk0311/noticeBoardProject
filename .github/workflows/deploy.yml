@@ -32,14 +32,17 @@ jobs:
 
       - name: Build Docker image
         run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app-lee:latest .
-        docker push ${{ secrets.DOCKER_USERNAME }}/my-app-lee:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app-lee:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-app-lee:latest
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: SSH to EC2 and deploy
         uses: appleboy/ssh-action@master
         with:
