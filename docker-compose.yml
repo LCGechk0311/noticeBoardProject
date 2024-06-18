@@ -29,6 +29,7 @@ services:
       DB_NAME: my_database
     depends_on:
       - mysql
+    command: npm run start:prod
 
 volumes:
   mysql-data:
