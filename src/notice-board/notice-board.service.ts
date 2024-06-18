@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-board.dto';
 import { UpdatePostDto } from './dto/update-board.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { PostCategory } from '@prisma/client';
 import { subDays, subMonths, subYears } from 'date-fns';
 import { SearchPostsDto, SortOrder } from './dto/search-boards.dto';

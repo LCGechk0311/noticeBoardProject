@@ -1,5 +1,5 @@
 import { Exclude, Expose, Type } from 'class-transformer';
-import { UserResponseDTO } from 'src/user/dto/response-user.dto';
+import { UserResponseDTO } from '../../user/dto/response-user.dto';
 
 @Exclude()
 export class PostResponseDTO {
