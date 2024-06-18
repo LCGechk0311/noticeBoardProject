@@ -17,7 +17,6 @@ import { Roles } from '../auth/roles.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../auth/guard/roles.guard';
 
-
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
