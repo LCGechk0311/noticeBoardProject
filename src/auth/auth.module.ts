@@ -16,9 +16,18 @@ import { LocalStrategy } from './strategy/local.strategy';
       isGlobal: true,
     }),
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: '20m' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        console.log('1111111111111111111111');
+        const secret = configService.get<string>('JWT_SECRET_KEY');
+        console.log('JWT Secret Key:', secret);
+        return {
+          secret,
+          signOptions: { expiresIn: '20m' },
+        };
+      },
     }),
     UserModule,
   ],
