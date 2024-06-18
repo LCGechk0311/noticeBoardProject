@@ -20,9 +20,7 @@ import { LocalStrategy } from './strategy/local.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const secret = configService.get<string>(
-          'fd12cfbeb361954bec9eac6b89e2213854a4fff10228d412e6741157268b2e7f',
-        );
+        const secret = configService.get<string>('JWT_SECRET_KEY');
         return {
           secret,
           signOptions: { expiresIn: '20m' },
