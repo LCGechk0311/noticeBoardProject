@@ -21,7 +21,7 @@ import { LocalStrategy } from './strategy/local.strategy';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET_KEY'),
-        signOptions: { expiresIn: '1d' },
+        signOptions: { expiresIn: '20m' },
       }),
     }),
     UserModule,
