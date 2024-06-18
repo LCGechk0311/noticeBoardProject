@@ -2,30 +2,46 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-board.dto';
 import { UpdatePostDto } from './dto/update-board.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Board, PostCategory } from '@prisma/client';
+import { PostCategory } from '@prisma/client';
 import { subDays, subMonths, subYears } from 'date-fns';
 import { SearchPostsDto, SortOrder } from './dto/search-boards.dto';
+import { PostResponseDTO } from './dto/response-board.dto';
+import { plainToClass } from 'class-transformer';
+import * as AWS from 'aws-sdk';
 
 @Injectable()
 export class PostService {
-  constructor(private prisma: PrismaService) {}
+  private s3: AWS.S3;
+  constructor(private prisma: PrismaService) {
+    this.s3 = new AWS.S3({
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_KEY,
+      region: 'ap-northeast-2',
+    });
+  }
 
   async createPost(
     createPostDto: CreatePostDto,
     authorId: string,
     userRole: string,
-  ): Promise<Board> {
+    imageUrl: string | null,
+  ): Promise<PostResponseDTO> {
     if (
       createPostDto.category === PostCategory.NOTICES &&
       userRole !== 'admin'
     ) {
       throw new ForbiddenException('Only administrators can create notices');
     }
-    return this.prisma.board.create({
+    const board = this.prisma.board.create({
       data: {
         ...createPostDto,
         authorId,
+        imageUrl,
       },
+    });
+
+    return plainToClass(PostResponseDTO, board, {
+      excludeExtraneousValues: true,
     });
   }
 
@@ -33,33 +49,68 @@ export class PostService {
     id: string,
     updatePostDto: UpdatePostDto,
     userRole: string,
-  ): Promise<Board> {
+    newImageUrl: string,
+  ): Promise<PostResponseDTO> {
     const post = await this.prisma.board.findUnique({ where: { id } });
+
+    if (newImageUrl) {
+      if (post.imageUrl) {
+        await this.deleteImageFromS3(post.imageUrl);
+      }
+    }
+
     if (post?.category === PostCategory.NOTICES && userRole !== 'admin') {
       throw new ForbiddenException('Only administrators can update notices');
     }
-    return this.prisma.board.update({
+    const board = this.prisma.board.update({
       where: { id },
-      data: updatePostDto,
+      data: {
+        ...updatePostDto,
+        imageUrl: newImageUrl || post.imageUrl,
+      },
+    });
+
+    return plainToClass(PostResponseDTO, board, {
+      excludeExtraneousValues: true,
     });
   }
 
-  async deletePost(id: string, userRole: string): Promise<Board> {
+  async deleteImageFromS3(imageUrl: string) {
+    const key = imageUrl.split('.amazonaws.com/')[1];
+    await this.s3
+      .deleteObject({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: key,
+      })
+      .promise();
+  }
+
+  async deletePost(id: string, userRole: string): Promise<PostResponseDTO> {
     const post = await this.prisma.board.findUnique({ where: { id } });
     if (post?.category === PostCategory.NOTICES && userRole !== 'admin') {
       throw new ForbiddenException('Only administrators can delete notices');
     }
-    return this.prisma.board.delete({
+    const board = await this.prisma.board.update({
       where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    await this.prisma.comment.updateMany({
+      where: { boardId: id },
+      data: { deletedAt: new Date() },
+    });
+
+    return plainToClass(PostResponseDTO, board, {
+      excludeExtraneousValues: true,
     });
   }
 
-  async getPost(id: string): Promise<Board | null> {
-    const post = await this.prisma.board.findUnique({
-      where: { id },
+  async getPost(id: string): Promise<PostResponseDTO | null> {
+    const board = await this.prisma.board.findUnique({
+      where: { id, deletedAt: null },
     });
 
-    if (post) {
+    if (board) {
       await this.prisma.board.update({
         where: { id },
         data: {
@@ -70,10 +121,12 @@ export class PostService {
       });
     }
 
-    return post;
+    return plainToClass(PostResponseDTO, board, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async getPosts(searchPostsDto: SearchPostsDto): Promise<Board[]> {
+  async getPosts(searchPostsDto: SearchPostsDto): Promise<PostResponseDTO[]> {
     const {
       sortOrder = SortOrder.LATEST,
       period,
@@ -81,7 +134,7 @@ export class PostService {
       title,
       author,
     } = searchPostsDto;
-    let whereClause = {};
+    let whereClause: any = { deletedAt: null };
 
     if (period) {
       const now = new Date();
@@ -128,7 +181,7 @@ export class PostService {
       };
     }
 
-    return this.prisma.board.findMany({
+    const boards = await this.prisma.board.findMany({
       where: whereClause,
       orderBy:
         sortOrder === SortOrder.POPULARITY
@@ -143,6 +196,7 @@ export class PostService {
         views: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
         author: {
           select: {
             email: true,
@@ -150,6 +204,10 @@ export class PostService {
           },
         },
       },
+    });
+
+    return plainToClass(PostResponseDTO, boards, {
+      excludeExtraneousValues: true,
     });
   }
 }

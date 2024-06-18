@@ -22,7 +22,9 @@ model User {
   updatedAt DateTime @default(now())
   createdAt DateTime @default(now())
   boards    Board[]
+  comments  Comment[]
   role      String   @default("user")
+  deletedAt DateTime?
 }
 
 model Board {
@@ -34,6 +36,9 @@ model Board {
   views       Int      @default(0)
   updatedAt DateTime @default(now())
   createdAt DateTime @default(now())
+  comments  Comment[]
+  imageUrl  String?
+  deletedAt DateTime?
 
   author    User     @relation(fields: [authorId], references: [id])
 }
@@ -42,4 +47,20 @@ enum PostCategory {
   NOTICES
   QNA
   INQUIRY
+}
+
+model Comment {
+  id        String      @id @default(uuid())
+  content   String
+  boardId    String
+  authorId  String
+  parentId  String?     // This is for replies to comments
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now())
+  deletedAt DateTime?
+  
+  board      Board        @relation(fields: [boardId], references: [id])
+  author    User        @relation(fields: [authorId], references: [id])
+  parent    Comment?    @relation("Replies", fields: [parentId], references: [id])
+  replies   Comment[]   @relation("Replies")
 }

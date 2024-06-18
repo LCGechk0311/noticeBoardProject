@@ -5,9 +5,22 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { NoticeBoardModule } from './notice-board/notice-board.module';
+import { CommentModule } from './comment/comment.module';
+import { UploadModule } from './upload/upload.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PrismaModule, UserModule, AuthModule, NoticeBoardModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    PrismaModule,
+    UserModule,
+    AuthModule,
+    NoticeBoardModule,
+    CommentModule,
+    UploadModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

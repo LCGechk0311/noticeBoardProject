@@ -10,24 +10,43 @@ import {
   Request,
   ForbiddenException,
   Query,
+  UploadedFile,
+  UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import { PostService } from './notice-board.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { CreatePostDto } from './dto/create-board.dto';
+import { CreatePostDto, CustomFile } from './dto/create-board.dto';
 import { UpdatePostDto } from './dto/update-board.dto';
 import { SearchPostsDto } from './dto/search-boards.dto';
+import { UploadService } from '../upload/upload.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from '../upload/multer.config';
 
 @Controller('posts')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  private readonly logger = new Logger(PostController.name);
+  constructor(
+    private readonly postService: PostService,
+    private readonly uploadService: UploadService,
+  ) {
+    this.logger.log('Initializing multer options');
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async createPost(@Body() createPostDto: CreatePostDto, @Request() req) {
+  @UseInterceptors(FileInterceptor('image', multerOptions))
+  async createPost(
+    @UploadedFile() file: CustomFile,
+    @Body() createPostDto: CreatePostDto,
+    @Request() req,
+  ) {
+    const imageUrl = file ? file.location : null;
     return this.postService.createPost(
       createPostDto,
       req.user.id,
       req.user.userRole,
+      imageUrl,
     );
   }
 
@@ -43,8 +62,10 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('image', multerOptions))
   async updatePost(
     @Param('id') id: string,
+    @UploadedFile() file: CustomFile,
     @Body() updatePostDto: UpdatePostDto,
     @Request() req,
   ) {
@@ -53,7 +74,13 @@ export class PostController {
       throw new ForbiddenException('다른 사람의 글을 업데이트 할 수없습니다');
     }
 
-    return this.postService.updatePost(id, updatePostDto, req.user.userRole);
+    const newImageUrl = file ? file.location : null;
+    return this.postService.updatePost(
+      id,
+      updatePostDto,
+      req.user.userRole,
+      newImageUrl,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

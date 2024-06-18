@@ -12,11 +12,5 @@ export class UserResponseDTO {
   userName: string;
 
   @Expose()
-  updatedAt: Date;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
   role: string;
 }

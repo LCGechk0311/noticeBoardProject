@@ -26,13 +26,17 @@ export class UserService {
   }
 
   async findOneEmail(email: string) {
-    const user = this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email, deletedAt: null },
+    });
 
     return user;
   }
 
   async findById(id: string): Promise<UserResponseDTO> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id, deletedAt: null },
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -42,7 +46,9 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<UserResponseDTO[]> {
-    const users = await this.prisma.user.findMany();
+    const users = await this.prisma.user.findMany({
+      where: { deletedAt: null },
+    });
 
     return plainToClass(UserResponseDTO, users, {
       excludeExtraneousValues: true,
@@ -70,8 +76,19 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<UserResponseDTO> {
-    const user = await this.prisma.user.delete({
+    const user = await this.prisma.user.update({
       where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    await this.prisma.comment.updateMany({
+      where: { authorId: id },
+      data: { deletedAt: new Date() },
+    });
+
+    await this.prisma.board.updateMany({
+      where: { authorId: id },
+      data: { deletedAt: new Date() },
     });
 
     return plainToClass(UserResponseDTO, user, {
