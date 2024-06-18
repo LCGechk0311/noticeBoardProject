@@ -49,6 +49,7 @@ jobs:
           script: |
             cd ~/noticeBoardProject
             git pull origin main
+
             sed -i '/JWT_SECRET_KEY/d' .env
             sed -i '/AWS_SECRET_ACCESS_KEY/d' .env
             sed -i '/AWS_ACCESS_KEY/d' .env
@@ -56,6 +57,7 @@ jobs:
             sed -i '/AWS_SECRET_KEY/d' .env
             sed -i '/AWS_DEFAULT_REGION/d' .env
             sed -i '/AWS_S3_BUCKET_NAME/d' .env
+
             echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
             echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
@@ -63,7 +65,9 @@ jobs:
             echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
             echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> .env
             echo "AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}" >> .env
+
             sudo usermod -aG docker $USER
             newgrp docker
+
             docker-compose down
             docker-compose up -d --build
