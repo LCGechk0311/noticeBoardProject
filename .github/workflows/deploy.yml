@@ -50,6 +50,7 @@ jobs:
             cd ~/noticeBoardProject
             git pull origin main
 
+            sed -i '/JWT_SECRET_ACCESS_KEY/d' .env
             sed -i '/JWT_SECRET_KEY/d' .env
             sed -i '/AWS_SECRET_ACCESS_KEY/d' .env
             sed -i '/AWS_ACCESS_KEY/d' .env
