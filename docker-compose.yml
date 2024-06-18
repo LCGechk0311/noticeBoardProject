@@ -16,7 +16,7 @@ services:
       - mysql-data:/var/lib/mysql
 
   app:
-    image: leechanggeun/my-app-lee
+    image: leechanggeun/my-app-lee:latest
     container_name: my-app-container
     restart: always
     ports:
