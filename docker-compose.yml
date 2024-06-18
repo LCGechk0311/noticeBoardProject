@@ -1,55 +1,35 @@
-# version: '3.8'
+version: '3.8'
 
-# services:
-#   mysql:
-#     image: mysql:5.7
-#     container_name: mysql
-#     restart: always
-#     environment:
-#       MYSQL_ROOT_PASSWORD: qwer4321
-#       MYSQL_DATABASE: my_database
-#       MYSQL_USER: my_user
-#       MYSQL_PASSWORD: qwer1234
-#     ports:
-#       - "3306:3306"
-#     volumes:
-#       - mysql-data:/var/lib/mysql
-
-#   app:
-#     image: leechanggeun/my-app-lee:latest
-#     container_name: my-app-container
-#     restart: always
-#     ports:
-#       - "3000:3000"
-#     environment:
-#       DB_HOST: mysql
-#       DB_PORT: 3306
-#       DB_USER: my_user
-#       DB_PASSWORD: qwer1234
-#       DB_NAME: my_database
-#     depends_on:
-#       - mysql
-#     command: npm run start:prod
-
-# volumes:
-#   mysql-data:
-
-version: '3'
 services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: qwer4321
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: qwer1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
   app:
     image: leechanggeun/my-app-lee:latest
-    env_file:
-      - .env
+    container_name: my-app-container
+    restart: always
     ports:
-      - '3000:3000'
-    depends_on:
-      - db
-  db:
-    image: mysql:5.7
+      - "3000:3000"
     environment:
-      MYSQL_ROOT_PASSWORD: your_mysql_root_password
-      MYSQL_DATABASE: your_database_name
-      MYSQL_USER: your_user
-      MYSQL_PASSWORD: your_password
-    ports:
-      - '3306:3306'
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: my_user
+      DB_PASSWORD: qwer1234
+      DB_NAME: my_database
+    depends_on:
+      - mysql
+    command: npm run start:prod
+
+volumes:
+  mysql-data:
