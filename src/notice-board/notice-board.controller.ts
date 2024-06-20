@@ -22,6 +22,7 @@ import { SearchPostsDto } from './dto/search-boards.dto';
 import { UploadService } from '../upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../upload/multer.config';
+import { PostResponseDTO } from './dto/response-board.dto';
 
 @Controller('posts')
 export class PostController {
@@ -92,5 +93,10 @@ export class PostController {
     }
 
     return this.postService.deletePost(id, req.user.userRole);
+  }
+
+  @Get('deleted')
+  async getDeletedPosts(): Promise<PostResponseDTO[]> {
+    return this.postService.getDeletedPosts();
   }
 }

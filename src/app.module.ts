@@ -8,6 +8,7 @@ import { NoticeBoardModule } from './notice-board/notice-board.module';
 import { CommentModule } from './comment/comment.module';
 import { UploadModule } from './upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     NoticeBoardModule,
     CommentModule,
-    UploadModule
+    UploadModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

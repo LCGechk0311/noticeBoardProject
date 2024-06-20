@@ -126,6 +126,20 @@ export class PostService {
     });
   }
 
+  async getDeletedPosts(): Promise<PostResponseDTO[]> {
+    const deletedPosts = await this.prisma.board.findMany({
+      where: {
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
+
+    return plainToClass(PostResponseDTO, deletedPosts, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   async getPosts(searchPostsDto: SearchPostsDto): Promise<PostResponseDTO[]> {
     const {
       sortOrder = SortOrder.LATEST,

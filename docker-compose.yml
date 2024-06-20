@@ -1,35 +1,35 @@
-version: '3.8'
+# version: '3.8'
 
-services:
-  mysql:
-    image: mysql:5.7
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: qwer4321
-      MYSQL_DATABASE: my_database
-      MYSQL_USER: my_user
-      MYSQL_PASSWORD: qwer1234
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
+# services:
+#   mysql:
+#     image: mysql:5.7
+#     container_name: mysql
+#     restart: always
+#     environment:
+#       MYSQL_ROOT_PASSWORD: qwer4321
+#       MYSQL_DATABASE: my_database
+#       MYSQL_USER: my_user
+#       MYSQL_PASSWORD: qwer1234
+#     ports:
+#       - "3306:3306"
+#     volumes:
+#       - mysql-data:/var/lib/mysql
 
-  app:
-    image: leechanggeun/my-app-lee:latest
-    container_name: my-app-container
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: my_user
-      DB_PASSWORD: qwer1234
-      DB_NAME: my_database
-    depends_on:
-      - mysql
-    command: npm run start:prod
+#   app:
+#     image: leechanggeun/my-app-lee:latest
+#     container_name: my-app-container
+#     restart: always
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       DB_HOST: mysql
+#       DB_PORT: 3306
+#       DB_USER: my_user
+#       DB_PASSWORD: qwer1234
+#       DB_NAME: my_database
+#     depends_on:
+#       - mysql
+#     command: npm run start:prod
 
-volumes:
-  mysql-data:
+# volumes:
+#   mysql-data:
